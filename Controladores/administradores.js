@@ -43,6 +43,58 @@ const cadastrarAdministrador = async (req, res) => {
   }
 }
 
+const atualizarAdministradores = async (req, res) => {
+  const { administrador } =req;
+  let {
+    nome_adm, 
+    nascimento, 
+    nacionalidade, 
+    cpf, 
+    rg, 
+    orgao_de_expediente, 
+    id_carteira
+  } = req.body;
+
+  if(!administrador){
+    return res.status(401).json('Usuário não autorizado!');
+  }
+
+  try {
+    const buscarAdm = await knex('administradores').where({id: administrador.id}).first();
+    
+    if(!buscarAdm){
+      return res.status(400).json('Nenhum administrador cadastrado!');
+    }
+
+    nome_adm = nome_adm ? nome_adm : buscarAdm.nome_adm;
+    nascimento = nascimento ? nascimento : buscarAdm.nascimento;
+    nacionalidade = nacionalidade ? nacionalidade : buscarAdm.nacionalidade;
+    cpf = cpf ? cpf : buscarAdm.cpf;
+    rg = rg ? rg : buscarAdm.rg;
+    orgao_de_expediente = orgao_de_expediente ? orgao_de_expediente : buscarAdm.orgao_de_expediente;
+    id_carteira =  id_carteira?  id_carteira : buscarAdm.id_carteira;
+
+    const atualizar = await knex('administradores')
+    .update({
+      nome_adm, 
+      nascimento, 
+      nacionalidade, 
+      cpf, 
+      rg, 
+      orgao_de_expediente, 
+      id_carteira
+    }).where({id: administrador.id});
+
+    if(!atualizar){
+      return res.status(400).json('Não foi possível atualizar o administrador!');
+    }
+
+    return res.status(200).json('Administrador atualizado com sucesso!');
+  } catch (error) {
+    return res.status(400).json(error.message)
+  }
+}
+
 const listarAdministradores = async (req, res) => {
   try {
     const listarAdm = await knex('administradores')
@@ -112,5 +164,6 @@ module.exports = {
   cadastrarAdministrador,
   listarAdministradores,
   deletarAdministrador,
-  detalharAdministrador
+  detalharAdministrador,
+  atualizarAdministradores
 }
